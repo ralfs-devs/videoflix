@@ -45,6 +45,9 @@ services:
       context: .
       dockerfile: backend.Dockerfile
     command: python manage.py rqworker default
+    env_file: .env
+    environment:
+      - PYTHONBUFFERED=1
     deploy:
       replicas: 3
     depends_on:

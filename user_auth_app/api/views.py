@@ -63,7 +63,7 @@ class RegisterView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
-class ActivateView(APIView):
+class ActivationView(APIView):
     """API view for account activation.
 
     Activates a user account using the UID and token from the
@@ -158,7 +158,7 @@ class LogoutView(APIView):
     Requires a valid refresh token cookie.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         """Handle POST request for user logout.

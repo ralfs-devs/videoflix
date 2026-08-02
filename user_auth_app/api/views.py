@@ -17,9 +17,8 @@ Classes:
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView, Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -228,7 +227,7 @@ class TokenRefreshView(APIView):
             new_access_token = str(token.access_token)
 
             response = Response(
-                {'detail': 'Token refreshed'},
+                {'detail': 'Token refreshed', 'access': new_access_token},
                 status=status.HTTP_200_OK
             )
             response.set_cookie(
@@ -285,6 +284,40 @@ class PasswordResetConfirmView(APIView):
     """
 
     permission_classes = [AllowAny]
+
+    def get(self, request, uidb64, token):
+        """Handle GET request for password reset confirmation.
+
+        Validates the token and returns the reset status. In a real
+        application, this would render an HTML form for entering the
+        new password. For API purposes, it confirms the token is valid.
+
+        Args:
+            request (Request): The HTTP request.
+            uidb64 (str): Base64-encoded user ID from the URL.
+            token (str): Password reset token from the URL.
+
+        Returns:
+            Response: 200 if token is valid, 400 on invalid/expired token.
+        """
+
+        user = UserService.decode_uidb64(uidb64)
+
+        if not user or not default_token_generator.check_token(user, token):
+            return Response(
+                {'detail': 'Password reset failed. Invalid or expired token.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Token is valid, but we can't show a form in API mode
+        # In production, redirect to HTML page with reset form
+        return Response(
+            {
+                'detail': 'Token valid. Send new password via POST.',
+                'valid': True
+            },
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request, uidb64, token):
         """Handle POST request for password reset confirmation.

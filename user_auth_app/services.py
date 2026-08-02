@@ -14,8 +14,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+
+from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -209,7 +212,8 @@ class UserService:
 
     @staticmethod
     def reset_user_password(user, new_password):
-        """Set a new password for a user.
+        """Set a new password for a user 
+           and confirm the change of the Password via E-Mail
 
         Args:
             user (User): The user instance to update.
@@ -220,7 +224,25 @@ class UserService:
         """
         user.set_password(new_password)
         user.save()
-        return True
+
+        try:
+            send_mail(
+                subject='Password Changed Successfully',
+                message=(
+                    f'Hello,\n\n'
+                    f'Your password for the Videoflix account '
+                    f'(email: {user.username}) was successfully reset on '
+                    f'{timezone.now().strftime("%d.%m.%Y at %H:%M UTC")}.\n\n'
+                    f'If this was not you, please contact support immediately.\n\n'
+                    f'The Videoflix Team'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.username],
+                fail_silently=False,
+            )
+            return True
+        except Exception:
+            return False
 
     @staticmethod
     def decode_uidb64(uidb64):

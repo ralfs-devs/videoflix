@@ -2,25 +2,23 @@
 
 set -e
 
-echo "Warte auf PostgreSQL auf $DB_HOST:$DB_PORT..."
+echo "Waiting for PostgreSQL on $DB_HOST:$DB_PORT..."
 
-# -q für "quiet" (keine Ausgabe außer Fehlern)
-# Die Schleife läuft, solange pg_isready *nicht* erfolgreich ist (Exit-Code != 0)
 while ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -q; do
-  echo "PostgreSQL ist nicht erreichbar - schlafe 1 Sekunde"
+  echo "Could not reach PostgreSQL - sleeping for 1 second"
   sleep 1
 done
 
-echo "PostgreSQL ist bereit - fahre fort..."
+echo "PostgreSQL ready - continuing..."
 
-# Deine originalen Befehle (ohne wait_for_db)
 python manage.py collectstatic --noinput
-python manage.py makemigrations
-python manage.py migrate
 
-# Create a superuser using environment variables
-# (Dein Superuser-Erstellungs-Code bleibt gleich)
-python manage.py shell <<EOF
+if [ "${SKIP_MIGRATIONS:-false}" != "true" ]; then
+    echo "Running migrations..."
+    python manage.py makemigrations
+    python manage.py migrate
+
+    python manage.py shell <<EOF
 import os
 from django.contrib.auth import get_user_model
 
@@ -31,12 +29,19 @@ password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'adminpassword')
 
 if not User.objects.filter(username=username).exists():
     print(f"Creating superuser '{username}'...")
-    # Korrekter Aufruf: username hier übergeben
     User.objects.create_superuser(username=username, email=email, password=password)
     print(f"Superuser '{username}' created.")
 else:
-    print(f"Superuser '{username}' already exists.")
+    print(f"Updating password for superuser '{username}'...")
+    user = User.objects.get(username=username)
+    user.set_password(password)
+    user.email = email
+    user.save()
+    print(f"Superuser '{username}' password updated.")
 EOF
+else
+    echo "Skipping migrations and superuser creation (SKIP_MIGRATIONS=true)"
+fi
 
 python manage.py rqworker default &
 

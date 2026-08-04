@@ -48,6 +48,7 @@ services:
     env_file: .env
     environment:
       - PYTHONBUFFERED=1
+      - SKIP_MIGRATIONS=true
     deploy:
       replicas: 3
     depends_on:

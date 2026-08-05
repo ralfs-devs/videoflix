@@ -12,16 +12,26 @@ Classes:
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
-from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
+from user_auth_app.email_templates import activation, password_reset
+
+from email.mime.image import MIMEImage
+import os
+
+LOGO_PATH = os.path.join(
+    settings.BASE_DIR,
+    'user_auth_app',
+    'email_templates',
+    'logo.svg'
+)
 User = get_user_model()
 
 
@@ -79,34 +89,27 @@ class UserService:
 
     @staticmethod
     def send_activation_email(user, uidb64, token):
-        """Send an account activation email to the user.
+        activation_url = f"http://localhost:8000/api/activate/{uidb64}/{token}"
 
-        Args:
-            user (User): The user instance to send the email to.
-            uidb64 (str): The base64-encoded user ID.
-            token (str): The activation token.
-
-        Returns:
-            bool: True if the email was sent successfully, False otherwise.
-        """
-        activation_link = (
-            f"{settings.CSRF_TRUSTED_ORIGINS[0]}"
-            f"/api/activate/{uidb64}/{token}/"
+        html = activation.render_activation_html(
+            user_email=user.username,
+            activation_url=activation_url
         )
-        try:
-            send_mail(
-                subject='Activate your account',
-                message=(
-                    f'Click the link to activate your account: '
-                    f'{activation_link}'
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.username],
-                fail_silently=False,
-            )
-            return True
-        except Exception:
-            return False
+
+        email = EmailMultiAlternatives(
+            subject='Activate your account',
+            body='',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.username],
+        )
+        email.attach_alternative(html, "text/html")
+
+        with open(LOGO_PATH, 'rb') as img:
+            logo = MIMEImage(img.read(), _subtype='svg+xml')
+            logo.add_header('Content-ID', '<logo_cid>')
+            email.attach(logo)
+
+        email.send(fail_silently=False)
 
     @staticmethod
     def activate_user(user):
@@ -181,68 +184,26 @@ class UserService:
 
     @staticmethod
     def send_password_reset_email(user, uidb64, token):
-        """Send a password reset email to the user.
+        reset_url = f"http://localhost:8000/api/reset-password/{uidb64}/{token}"
 
-        Args:
-            user (User): The user instance to send the email to.
-            uidb64 (str): The base64-encoded user ID.
-            token (str): The password reset token.
-
-        Returns:
-            bool: True if the email was sent successfully, False otherwise.
-        """
-        reset_link = (
-            f"{settings.CSRF_TRUSTED_ORIGINS[0]}"
-            f"/api/password_confirm/{uidb64}/{token}/"
+        html = password_reset.render_password_reset_html(
+            reset_url=reset_url
         )
-        try:
-            send_mail(
-                subject='Reset your password',
-                message=(
-                    f'Click the link to reset your password: '
-                    f'{reset_link}'
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.username],
-                fail_silently=False,
-            )
-            return True
-        except Exception:
-            return False
 
-    @staticmethod
-    def reset_user_password(user, new_password):
-        """Set a new password for a user 
-           and confirm the change of the Password via E-Mail
+        email = EmailMultiAlternatives(
+            subject='Reset your password',
+            body='',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.username],
+        )
+        email.attach_alternative(html, "text/html")
 
-        Args:
-            user (User): The user instance to update.
-            new_password (str): The new plain-text password.
+        with open(LOGO_PATH, 'rb') as img:
+            logo = MIMEImage(img.read(), _subtype='svg+xml')
+            logo.add_header('Content-ID', '<logo_cid>')
+            email.attach(logo)
 
-        Returns:
-            bool: Always returns True after the password is set.
-        """
-        user.set_password(new_password)
-        user.save()
-
-        try:
-            send_mail(
-                subject='Password Changed Successfully',
-                message=(
-                    f'Hello,\n\n'
-                    f'Your password for the Videoflix account '
-                    f'(email: {user.username}) was successfully reset on '
-                    f'{timezone.now().strftime("%d.%m.%Y at %H:%M UTC")}.\n\n'
-                    f'If this was not you, please contact support immediately.\n\n'
-                    f'The Videoflix Team'
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.username],
-                fail_silently=False,
-            )
-            return True
-        except Exception:
-            return False
+        email.send(fail_silently=False)
 
     @staticmethod
     def decode_uidb64(uidb64):

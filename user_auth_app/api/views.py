@@ -13,7 +13,7 @@ Classes:
     PasswordResetRequestView: Sends a password reset email.
     PasswordResetConfirmView: Confirms and applies a new password.
 """
-
+from django.shortcuts import redirect
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
@@ -80,7 +80,8 @@ class ActivationView(APIView):
             token (str): Activation token from the URL.
 
         Returns:
-            Response: 200 on success, 400 on invalid or expired token.
+            HttpResponseRedirect: Redirects to login page on success.
+            Response: 400 on invalid or expired token.
         """
         try:
             user = UserService.decode_uidb64(uidb64)
@@ -92,10 +93,8 @@ class ActivationView(APIView):
 
         if user and default_token_generator.check_token(user, token):
             UserService.activate_user(user)
-            return Response(
-                {'detail': 'Account successfully activated.'},
-                status=status.HTTP_200_OK
-            )
+            # Redirect zur Frontend-Login-Seite nach erfolgreicher Aktivierung
+            return redirect('http://localhost:5500/pages/auth/login.html')
 
         return Response(
             {'detail': 'Activation failed.'},

@@ -12,7 +12,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
-
   redis:
     image: redis:latest
     container_name: videoflix_redis
@@ -27,7 +26,6 @@ services:
       dockerfile: backend.Dockerfile
     env_file: .env
     container_name: videoflix_backend
-
     volumes:
       - .:/app
       - videoflix_media:/app/media
@@ -40,22 +38,53 @@ services:
       - db
       - redis
 
-  worker:
+  worker-1:
     build: 
       context: .
       dockerfile: backend.Dockerfile
     command: python manage.py rqworker default
     env_file: .env
     environment:
-      - PYTHONBUFFERED=1
+      - PYTHONUNBUFFERED=1
       - SKIP_MIGRATIONS=true
-    deploy:
-      replicas: 3
+    volumes:
+      - videoflix_media:/app/media
+      - .:/app
     depends_on:
       - redis
       - db
 
+  worker-2:
+    build: 
+      context: .
+      dockerfile: backend.Dockerfile
+    command: python manage.py rqworker default
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SKIP_MIGRATIONS=true
+    volumes:
+      - videoflix_media:/app/media
+      - .:/app
+    depends_on:
+      - redis
+      - db
 
+  worker-3:
+    build: 
+      context: .
+      dockerfile: backend.Dockerfile
+    command: python manage.py rqworker default
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SKIP_MIGRATIONS=true
+    volumes:
+      - videoflix_media:/app/media
+      - .:/app
+    depends_on:
+      - redis
+      - db
 
 volumes:
   postgres_data:

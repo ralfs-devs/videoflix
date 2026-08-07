@@ -53,6 +53,6 @@ class VideoSegmentAdmin(admin.ModelAdmin):
     list_display = ["resolution", "segment_name",
                     "sequence_index", "duration"]
     list_filter = ["resolution__resolution", "resolution__video"]
-    search_fields = ["segment_name", "resolution__video__title"]
-    readonly_fields = ["segment_file",
+    search_fields = ["segment_path", "resolution__video__title"]
+    readonly_fields = ["segment_path",
                        "sequence_index", "duration"]

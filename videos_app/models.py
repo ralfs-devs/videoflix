@@ -169,9 +169,9 @@ class VideoResolution(models.Model):
         choices=RESOLUTION_CHOICES,
         help_text="Target resolution for transcoded output (480p, 720p, 1080p)"
     )
-    hls_manifest = models.FileField(
-        upload_to="hls/%Y/%m/%d/manifests/",
-        help_text="HLS master playlist file (.m3u8) for this resolution"
+    hls_manifest = models.CharField(
+        max_length=255,
+        help_text="Relative path to HLS manifest file (.m3u8) for this resolution"
     )
     width = models.PositiveSmallIntegerField(
         help_text="Frame width in pixels"
@@ -217,9 +217,10 @@ class VideoSegment(models.Model):
         max_length=50,
         help_text="Segment filename (e.g., '000.ts', '001.ts')"
     )
-    segment_file = models.FileField(
-        upload_to="hls/%Y/%m/%d/segments/",
-        help_text="Actual .ts video segment file"
+    segment_path = models.CharField(
+        max_length=255,
+        default='',
+        help_text="Relative path to .ts video segment file"
     )
     sequence_index = models.PositiveIntegerField(
         help_text="Sequential order for HLS playback"

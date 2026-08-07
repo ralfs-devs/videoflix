@@ -9,7 +9,6 @@ All tasks are registered with django-rq on the 'default' queue.
 """
 
 import os
-import re
 import logging
 import subprocess
 import json
@@ -231,7 +230,7 @@ def encode_video_to_hls(video_id):
             VideoSegment.objects.create(
                 resolution=vr,
                 segment_name=seg['name'],
-                segment_file='{}/{}'.format(m3u8_rel, seg['name']),
+                segment_path='{}/{}'.format(m3u8_rel, seg['name']),
                 sequence_index=idx,
                 duration=seg['duration'],
             )

@@ -19,7 +19,7 @@ class VideoAdmin(admin.ModelAdmin):
     list_display = ["title", "status", "duration", "created_at", "is_active"]
     list_filter = ["status", "is_active", "categories", "created_at"]
     search_fields = ["title", "description"]
-    readonly_fields = ["duration", "created_at", "updated_at"]
+    readonly_fields = ["thumbnail", "duration", "created_at", "updated_at"]
     date_hierarchy = "created_at"
 
     fieldsets = (

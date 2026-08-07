@@ -123,6 +123,15 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'videos_app': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['console'],
     },
 }
 AUTH_USER_MODEL = 'user_auth_app.User'

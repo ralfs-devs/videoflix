@@ -308,15 +308,7 @@ class PasswordResetConfirmView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Token is valid, but we can't show a form in API mode
-        # In production, redirect to HTML page with reset form
-        return Response(
-            {
-                'detail': 'Token valid. Send new password via POST.',
-                'valid': True
-            },
-            status=status.HTTP_200_OK
-        )
+        return redirect(f'http://127.0.0.1:5500/pages/auth/confirm_password.html?uid={uidb64}&token={token}')
 
     def post(self, request, uidb64, token):
         """Handle POST request for password reset confirmation.

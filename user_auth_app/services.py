@@ -184,7 +184,7 @@ class UserService:
 
     @staticmethod
     def send_password_reset_email(user, uidb64, token):
-        reset_url = f"http://localhost:8000/api/reset-password/{uidb64}/{token}"
+        reset_url = f"http://127.0.0.1:8000/api/password_confirm/{uidb64}/{token}"
 
         html = password_reset.render_password_reset_html(
             reset_url=reset_url
@@ -204,6 +204,21 @@ class UserService:
             email.attach(logo)
 
         email.send(fail_silently=False)
+
+    @staticmethod
+    def reset_user_password(user, new_password):
+        """Set a new password for the user.
+
+        Args:
+            user (User): The user instance to update.
+            new_password (str): The new plain-text password.
+
+        Returns:
+            bool: Always returns True after successful update.
+        """
+        user.set_password(new_password)
+        user.save()
+        return True
 
     @staticmethod
     def decode_uidb64(uidb64):

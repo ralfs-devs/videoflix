@@ -70,12 +70,12 @@ First start of the Docker Services:
 docker compose up --build
 ~~~
 
-Videos can be uploaded by using the admin interface:
-http://127.0.0.1/admin/videos_app/video/
+to upload and convert videos to the Database please use the admin Endpoint:
+127.0.0.1/admin/videos_app/video/
 
 Thanks go to Developer Akademie GmbH for providing a 
 Frontend Application for testing purposes:
-https://github.com/ralfs-devs/Developer-Akademie-Backendkurs/project.Videoflix
+https://github.com/Developer-Akademie-Backendkurs/project.Videoflix
 
 ## Testing Notes:
 

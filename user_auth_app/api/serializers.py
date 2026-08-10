@@ -140,7 +140,6 @@ class LoginSerializer(serializers.Serializer):
                 'password': 'Invalid credentials.'
             })
 
-        # Generate JWT tokens
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
 

@@ -9,11 +9,10 @@ class JWTCookieAuthentication(JWTAuthentication):
     """
 
     def get_raw_token(self, header):
-        # 1. Erst Header prüfen (Standard-Verhalten)
+
         if header is not None:
             return super().get_raw_token(header)
 
-        # 2. Dann Cookie prüfen
         access_token = self.request.COOKIES.get('access_token')
         if not access_token:
             return None
@@ -21,13 +20,11 @@ class JWTCookieAuthentication(JWTAuthentication):
         return access_token
 
     def authenticate(self, request):
-        # Setze self.request für die Dauer der Authentifizierung
+
         self.request = request
 
-        # Header-first, dann Cookie
         header_value = self.get_header(request)
 
-        # Erst im Header suchen
         if header_value is not None:
             raw_token = self.get_raw_token(header_value)
             if raw_token:
@@ -38,7 +35,6 @@ class JWTCookieAuthentication(JWTAuthentication):
                 except Exception as exc:
                     raise AuthenticationFailed(str(exc))
 
-        # Dann im Cookie suchen
         access_token = request.COOKIES.get('access_token')
         if not access_token:
             return None

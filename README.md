@@ -55,7 +55,7 @@ pip freeze
 
 copy the env.template to a .env file:
 ~~~bash
-cp env.template .env
+cp env_template .env
 ~~~
 
 (Open this .env file in an editor

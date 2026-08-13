@@ -43,7 +43,7 @@ newgrp docker
 
 Make sure entrypoint scripts are executable:
 ~~~bash
-chmod +x backend/entrypoint.sh
+chmod +x backend.entrypoint.sh
 ~~~
 
 ### First start of the Docker Services:

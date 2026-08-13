@@ -16,41 +16,9 @@ Clone the repository:
 git clone https://github.com/ralfs-devs/videoflix
 ~~~
 
-### For installing and testing the API:
 Navigate into the project folder:
 ~~~bash
 cd ./videoflix
-~~~
-
-Create a virtual environment:
-~~~bash
-python -m venv .venv
-~~~
-(You may need to use python3 instead of python)
-
-Activate the virtual environment:
-##### Windows:
-~~~bash
-source .venv\Scripts\activate
-~~~
-##### macOS/Linux:
-~~~bash
-source .venv/bin/activate
-~~~
-
-look for actually installed Dependencies:
-~~~bash
-pip freeze
-~~~
-
-Install required packages:
-~~~bash
-pip install -r requirements.txt
-~~~
-
-Check whether all the necessary dependencies are installed:
-~~~bash
-pip freeze
 ~~~
 
 copy the env.template to a .env file:
@@ -65,7 +33,20 @@ and to determine your personal settings
 caution: change only the values to your personal settings,
 don't change any keyname
 
-First start of the Docker Services:
+### Prerequisites
+
+Add your user to the `docker` group (run once):
+~~~bash
+sudo usermod -aG docker $USER
+newgrp docker
+~~~
+
+Make sure entrypoint scripts are executable:
+~~~bash
+chmod +x backend/entrypoint.sh
+~~~
+
+### First start of the Docker Services:
 ~~~bash
 docker compose up --build
 ~~~
